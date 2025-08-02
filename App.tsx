@@ -15,6 +15,7 @@ import SettingsPage from './pages/SettingsPage';
 import DocumentsPage from './pages/DocumentsPage';
 import ReportsPage from './pages/ReportsPage';
 import ProjectSettingsPage from './pages/ProjectSettingsPage';
+import MyTasksPage from './pages/MyTasksPage';
 import { mockAuthService } from './services/mockData';
 import { User } from './types';
 import { Icons } from './components/Icons';
@@ -187,6 +188,7 @@ function App() {
               <Routes>
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+                  <Route path="/tasks" element={<ProtectedRoute><MyTasksPage /></ProtectedRoute>} />
                   <Route path="/project/:id" element={<ProtectedRoute><ProjectPage /></ProtectedRoute>} />
                   <Route path="/project/:id/inventory" element={<ProtectedRoute><InventoryPage /></ProtectedRoute>} />
                   <Route path="/project/:id/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />

@@ -1,5 +1,5 @@
 import { Project, User, Role, Task, TaskStatus, OrderStatus, ExpenseCategory, InventoryItem, Order, Expense, Log, MaterialConsumption, ClientInvoice, InvoiceStatus, InvoiceLineItem, ProjectTeamMember, AttendanceStatus, AttendanceRecord, Document, ProjectStatus, FinancialReportData, LaborReportData } from '../types';
-import { faker } from 'https://esm.sh/@faker-js/faker@9.0.0-rc.1';
+import { faker } from '@faker-js/faker';
 
 // --- MOCK USERS ---
 const users: User[] = [
@@ -207,6 +207,24 @@ export const mockDataService = {
   getProjects: async (): Promise<Project[]> => {
     await delay(500);
     return JSON.parse(JSON.stringify(projects.filter(p => p.status === ProjectStatus.ACTIVE)));
+  },
+  getTasksForUser: async (userId: string): Promise<(Task & { project: { id: string, name: string } })[]> => {
+    await delay(300);
+    const userTasks: (Task & { project: { id: string, name: string } })[] = [];
+    projects.forEach(project => {
+        project.tasks.forEach(task => {
+            if (task.assignee?.id === userId) {
+                userTasks.push({
+                    ...task,
+                    project: {
+                        id: project.id,
+                        name: project.name,
+                    }
+                });
+            }
+        });
+    });
+    return userTasks;
   },
   getProject: async (id: string): Promise<Project | null> => {
     await delay(400);
