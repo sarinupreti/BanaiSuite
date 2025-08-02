@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BanaiSuite - Construction ERP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Roboto', 'Inter', 'system-ui', 'Avenir', 'Helvetica', 'Arial', 'sans-serif'],
+            },
+            borderRadius: {
+              'xl': '12px',
+              '2xl': '16px',
+            },
+            colors: {
+              primary: {
+                '50': '#f0f9ff',
+                '100': '#e0f2fe',
+                '200': '#bae6fd',
+                '300': '#7dd3fc',
+                '400': '#38bdf8',
+                '500': '#0ea5e9',
+                '600': '#0284c7',
+                '700': '#0369a1',
+                '800': '#075985',
+                '900': '#0c4a6e',
+                '950': '#082f49',
+              },
+              background: 'var(--color-background)',
+              surface: 'var(--color-surface)',
+              'surface-variant': 'var(--color-surface-variant)',
+              'on-surface': 'var(--color-on-surface)',
+              'on-surface-variant': 'var(--color-on-surface-variant)',
+              'primary-container': 'var(--color-primary-container)',
+              'on-primary-container': 'var(--color-on-primary-container)',
+              'secondary-container': 'var(--color-secondary-container)',
+              'on-secondary-container': 'var(--color-on-secondary-container)',
+              outline: 'var(--color-outline)',
+              'outline-variant': 'var(--color-outline-variant)',
+            }
+          }
+        },
+        plugins: []
+      }
+    </script>
+    <style>
+       :root {
+        --color-background: #ffffff; /* white */
+        --color-surface: #f8fafc; /* slate-50 */
+        --color-surface-variant: #e2e8f0; /* slate-200 */
+        --color-on-surface: #0f172a; /* slate-900 */
+        --color-on-surface-variant: #475569; /* slate-600 */
+        --color-primary-container: #e0f2fe; /* primary-100 */
+        --color-on-primary-container: #0369a1; /* primary-700 */
+        --color-secondary-container: #e5e7eb; /* gray-200 */
+        --color-on-secondary-container: #374151; /* gray-700 */
+        --color-outline: #cbd5e1; /* slate-300 */
+        --color-outline-variant: #94a3b8; /* slate-400 */
+      }
+
+      html.dark {
+        --color-background: #0f172a; /* slate-900 */
+        --color-surface: #1e293b; /* slate-800 */
+        --color-surface-variant: #334155; /* slate-700 */
+        --color-on-surface: #f1f5f9; /* slate-100 */
+        --color-on-surface-variant: #cbd5e1; /* slate-300 */
+        --color-primary-container: #0c4a6e; /* primary-900 */
+        --color-on-primary-container: #bae6fd; /* primary-200 */
+        --color-secondary-container: #374151; /* gray-700 */
+        --color-on-secondary-container: #d1d5db; /* gray-300 */
+        --color-outline: #475569; /* slate-600 */
+        --color-outline-variant: #334155; /* slate-700 */
+      }
+
+      body {
+        background-color: var(--color-background);
+        color: var(--color-on-surface);
+        font-family: 'Roboto', sans-serif;
+      }
+      .fab {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 40;
+      }
+      /* For mobile, FAB is above bottom nav */
+       @media (max-width: 768px) {
+        .fab {
+          bottom: 6rem;
+        }
+       }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "recharts": "https://esm.sh/recharts@^3.1.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.10.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.525.0",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.7.0",
+    "appwrite": "https://esm.sh/appwrite@15.0.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
