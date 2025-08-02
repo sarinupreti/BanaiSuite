@@ -16,7 +16,7 @@ import DocumentsPage from './pages/DocumentsPage';
 import ReportsPage from './pages/ReportsPage';
 import ProjectSettingsPage from './pages/ProjectSettingsPage';
 import MyTasksPage from './pages/MyTasksPage';
-import { mockAuthService } from './services/mockData';
+import { authService } from './services/auth';
 import { User } from './types';
 import { Icons } from './components/Icons';
 import { SettingsProvider } from './contexts/SettingsContext';
@@ -42,17 +42,28 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   const [isAuthLoading, setIsAuthLoading] = useState(true);
 
   useEffect(() => {
-    const checkUser = async () => {
-      setIsAuthLoading(true);
-      const currentUser = await mockAuthService.getLoggedInUser();
-      setUser(currentUser);
-      setIsAuthLoading(false);
+    const fetchUser = async () => {
+        try {
+            const currentUser = await authService.getCurrentUser();
+            setUser(currentUser);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setIsAuthLoading(false);
+        }
     };
-    checkUser();
+
+    fetchUser();
+
+    const { subscription } = authService.onAuthStateChange(setUser);
+
+    return () => {
+        subscription?.unsubscribe();
+    };
   }, []);
 
-  const logout = () => {
-    mockAuthService.logout();
+  const logout = async () => {
+    await authService.signOut();
     setUser(null);
   };
 
