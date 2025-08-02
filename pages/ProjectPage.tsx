@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { mockDataService } from '../services/mockData';
+import { projectService } from '../services/projects';
+import { taskService } from '../services/tasks';
 import { Project, Task, TaskStatus } from '../types';
 import { Icons } from '../components/Icons';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui';
@@ -77,7 +78,7 @@ const ProjectPage: React.FC = () => {
         if (!id) return;
         try {
             setIsLoading(true);
-            const projectData = await mockDataService.getProject(id);
+            const projectData = await projectService.getProject(id);
             setProject(projectData);
         } catch (error) {
             console.error("Failed to fetch project:", error);
@@ -97,15 +98,20 @@ const ProjectPage: React.FC = () => {
 
     const handleSaveTask = async (taskData: Omit<Task, 'id' | 'dependencies' | 'startDate'>) => {
         if (!project) return;
-        if (taskToEdit) {
-            await mockDataService.updateTask(project.id, { ...taskToEdit, ...taskData });
-        } else {
-            await mockDataService.createTask(project.id, taskData);
+
+        try {
+            let updatedTasks: Task[];
+            if (taskToEdit) {
+                const updatedTask = await taskService.updateTask(taskToEdit.id, taskData);
+                updatedTasks = project.tasks.map(t => t.id === taskToEdit.id ? updatedTask : t);
+            } else {
+                const newTask = await taskService.createTask({ ...taskData, project_id: project.id });
+                updatedTasks = [...project.tasks, newTask];
+            }
+            setProject({ ...project, tasks: updatedTasks });
+        } catch (error) {
+            console.error("Failed to save task:", error);
         }
-        // Instead of a full refetch, we could update state locally
-        // but for mock data, a refetch is simple and effective.
-        const updatedProject = await mockDataService.getProject(project.id);
-        setProject(updatedProject);
     };
 
     if (isLoading && !project) {

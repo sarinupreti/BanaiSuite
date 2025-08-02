@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { mockDataService, mockAuthService } from '../services/mockData';
+import { projectService } from '../services/projects';
+import { orderService } from '../services/orders';
 import { Project, Order, OrderStatus, Role } from '../types';
 import { Icons } from '../components/Icons';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui';
@@ -59,21 +60,27 @@ const OrdersPage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [orderToEdit, setOrderToEdit] = useState<Order | null>(null);
 
-    const fetchProject = async () => {
+    const [orders, setOrders] = useState<Order[]>([]);
+
+    const fetchProjectAndOrders = async () => {
         if (!id) return;
         setIsLoading(true);
         try {
-            const projectData = await mockDataService.getProject(id);
+            const projectData = await projectService.getProject(id);
             setProject(projectData);
+            if (projectData) {
+                const orderData = await orderService.getOrders(projectData.id);
+                setOrders(orderData);
+            }
         } catch (error) {
-            console.error("Failed to fetch project:", error);
+            console.error("Failed to fetch project and orders:", error);
         } finally {
             setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchProject();
+        fetchProjectAndOrders();
     }, [id]);
 
     const handleOpenModal = (order: Order | null) => {
@@ -82,16 +89,15 @@ const OrdersPage: React.FC = () => {
     };
     
     const handleSaveOrder = async (orderData: any) => {
-        if (!id) return;
+        if (!id || !user) return;
         
-        if (orderToEdit || orderData.id) { // This is an update
-            await mockDataService.updateOrder(id, orderData);
-        } else { // This is a new creation
-            if (!user) return; // Should not happen
-            await mockDataService.createOrder(id, { items: orderData.items, requestedBy: user });
+        if (orderToEdit || orderData.id) {
+            const updatedOrder = await orderService.updateOrder(orderData.id, orderData);
+            setOrders(orders.map(o => o.id === updatedOrder.id ? updatedOrder : o));
+        } else {
+            const newOrder = await orderService.createOrder({ ...orderData, project_id: id, requested_by: user.id });
+            setOrders([...orders, newOrder]);
         }
-        
-        fetchProject();
     };
 
     if (isLoading) {

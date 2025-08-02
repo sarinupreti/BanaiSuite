@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { mockDataService } from '../services/mockData';
+import { projectService } from '../services/projects';
 import { Project } from '../types';
 import { Icons } from '../components/Icons';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui';
@@ -66,7 +66,7 @@ const DashboardPage: React.FC = () => {
       setIsLoading(true);
       setError(null);
       try {
-        const projectList = await mockDataService.getProjects();
+        const projectList = await projectService.getProjects();
         setProjects(projectList);
       } catch (err: any) {
         setError("Failed to load projects.");
