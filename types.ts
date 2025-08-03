@@ -11,10 +11,10 @@ export enum Role {
 
 export interface User {
   id: string;
-  name: string;
+  name?: string;
   email: string;
-  role: Role;
-  avatarUrl: string;
+  role?: Role;
+  avatarUrl?: string;
 }
 
 export interface ProjectTeamMember {

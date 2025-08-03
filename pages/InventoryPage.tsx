@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { mockDataService, mockAuthService } from '../services/mockData';
+import { projectService } from '../services/projects';
+import { inventoryService } from '../services/inventory';
 import { Project, InventoryItem, MaterialConsumption, User, Order } from '../types';
 import { Icons } from '../components/Icons';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui';
@@ -51,21 +52,27 @@ const InventoryPage: React.FC = () => {
     const [initialOrderItems, setInitialOrderItems] = useState<{name: string, quantity: number, unit: string}[]>([]);
 
 
-    const fetchProject = async () => {
+    const [inventory, setInventory] = useState<InventoryItem[]>([]);
+
+    const fetchProjectAndInventory = async () => {
         if (!id) return;
         setIsLoading(true);
         try {
-            const projectData = await mockDataService.getProject(id);
+            const projectData = await projectService.getProject(id);
             setProject(projectData);
+            if (projectData) {
+                const inventoryData = await inventoryService.getInventory(projectData.id);
+                setInventory(inventoryData);
+            }
         } catch (error) {
-            console.error("Failed to fetch project:", error);
+            console.error("Failed to fetch project and inventory:", error);
         } finally {
             setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchProject();
+        fetchProjectAndInventory();
     }, [id]);
     
     const handleOpenItemModal = (item: InventoryItem | null) => {
@@ -77,19 +84,17 @@ const InventoryPage: React.FC = () => {
         if (!id) return;
 
         if (itemToEdit) {
-            await mockDataService.updateInventoryItem(id, { ...itemToEdit, ...itemData });
+            const updatedItem = await inventoryService.updateInventoryItem(itemToEdit.id, itemData);
+            setInventory(inventory.map(i => i.id === itemToEdit.id ? updatedItem : i));
         } else {
-            await mockDataService.createInventoryItem(id, itemData);
+            const newItem = await inventoryService.createInventoryItem({ ...itemData, project_id: id, quantity: 0 });
+            setInventory([...inventory, newItem]);
         }
-        fetchProject(); // Refetch to show changes
     };
 
     const handleSaveConsumption = async (consumptionData: Omit<MaterialConsumption, 'id' | 'itemName' | 'unit' | 'loggedBy'>) => {
-        const currentUser = await mockAuthService.getLoggedInUser();
-        if (!id || !currentUser) return;
-
-        await mockDataService.logMaterialConsumption(id, { ...consumptionData, loggedBy: currentUser });
-        fetchProject();
+        // TODO: Implement with Supabase
+        console.log("Consumption logging not yet implemented with Supabase.");
     };
 
     const handleRequestItem = (item: InventoryItem) => {

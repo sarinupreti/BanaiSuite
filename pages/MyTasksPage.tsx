@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../App';
-import { mockDataService } from '../services/mockData';
+import { taskService } from '../services/tasks';
 import { Task, TaskStatus, User } from '../types';
 import TaskModal from '../components/TaskModal';
 import { Button } from '../components/ui';
@@ -71,12 +71,17 @@ const MyTasksPage: React.FC = () => {
         const fetchData = async () => {
             if (user) {
                 setIsLoading(true);
-                const userTasks = await mockDataService.getTasksForUser(user.id);
-                setTasks(userTasks);
-                // We need a list of all users for the assignee dropdown in the modal
-                const allUsers = await mockDataService.getAllUsers();
-                setAllUsers(allUsers);
-                setIsLoading(false);
+                try {
+                    const userTasks = await taskService.getTasksForUser(user.id);
+                    setTasks(userTasks as UserTask[]);
+                    // TODO: Fetch all users for the assignee dropdown
+                    // const allUsers = await profileService.getProfiles();
+                    // setAllUsers(allUsers);
+                } catch(error) {
+                    console.error("Failed to fetch tasks", error);
+                } finally {
+                    setIsLoading(false);
+                }
             }
         };
         fetchData();
@@ -94,17 +99,8 @@ const MyTasksPage: React.FC = () => {
 
     const handleSaveTask = async (taskData: Omit<Task, 'id' | 'dependencies' | 'startDate'>) => {
         if (selectedTask) {
-            const updatedTask = {
-                ...selectedTask,
-                ...taskData,
-                // Ensure dependencies and startDate are carried over if they exist
-                dependencies: selectedTask.dependencies || [],
-                startDate: selectedTask.startDate || new Date().toISOString(),
-            };
-            await mockDataService.updateTask(selectedTask.project.id, updatedTask);
-
-            // Update the task in the local state
-            setTasks(prevTasks => prevTasks.map(t => t.id === selectedTask.id ? updatedTask : t));
+            const updatedTask = await taskService.updateTask(selectedTask.id, taskData);
+            setTasks(prevTasks => prevTasks.map(t => t.id === selectedTask.id ? { ...t, ...updatedTask } : t));
         }
         // NOTE: Creating a new task is not supported from this page as we need project context.
         // The modal will only be used for editing.

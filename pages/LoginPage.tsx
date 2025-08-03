@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { mockAuthService } from '../services/mockData';
+import { authService } from '../services/auth';
 import { useAuth } from '../App';
 import { Icons } from '../components/Icons';
 import { Button } from '../components/ui';
@@ -9,10 +8,11 @@ import { Button } from '../components/ui';
 const LoginPage: React.FC = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('manager@banaisuite.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const navigate = useNavigate();
   const { setUser } = useAuth();
 
@@ -20,43 +20,43 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    setMessage('');
 
     try {
       let user;
       if (isSignUp) {
-        // Mock sign-up doesn't do much, just logs in with the new details
         if (!name) {
             setError('Please enter your full name.');
             setIsLoading(false);
             return;
         }
-        user = await mockAuthService.login(email, password, name);
+        user = await authService.signUp(email, password, name);
+        setMessage('Sign up successful! Please check your email to confirm your account.');
       } else {
-        user = await mockAuthService.login(email, password);
-      }
-
-      if (user) {
-        setUser(user);
-        navigate('/');
-      } else {
-         setError(`Invalid credentials. Use manager@banaisuite.com and password123`);
-         setIsLoading(false);
+        const authUser = await authService.signIn(email, password);
+        // The onAuthStateChange listener in App.tsx will handle setting the user
+        // and navigating to the dashboard. We just need to wait for it.
       }
     } catch (err: any) {
-        setIsLoading(false);
         setError(err.message || 'An unknown error occurred.');
+    } finally {
+        setIsLoading(false);
+        if(!isSignUp) {
+            // navigate('/'); // This might be too fast, onAuthStateChange handles it.
+        }
     }
   };
 
   const toggleForm = () => {
       setIsSignUp(!isSignUp);
       setError('');
-      setEmail(isSignUp ? '' : 'manager@banaisuite.com');
-      setPassword(isSignUp ? '' : 'password123');
+      setMessage('');
+      setEmail('');
+      setPassword('');
       setName('');
   };
   
-  const InputField = ({ id, type, placeholder, value, onChange, isFirst = false }) => (
+  const InputField = ({ id, type, placeholder, value, onChange }) => (
      <div>
         <label htmlFor={id} className="sr-only">{placeholder}</label>
         <input
@@ -64,6 +64,7 @@ const LoginPage: React.FC = () => {
             name={id}
             type={type}
             required
+            autoComplete={type === 'password' ? (isSignUp ? 'new-password' : 'current-password') : 'email'}
             className={`relative block w-full appearance-none rounded-2xl border border-outline bg-surface-variant px-4 py-3 text-on-surface placeholder-on-surface-variant focus:z-10 focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm`}
             placeholder={placeholder}
             value={value}
@@ -92,7 +93,9 @@ const LoginPage: React.FC = () => {
           <InputField id="email" type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} />
           <InputField id="password" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
 
-          {error && <div className="text-sm text-red-300 text-center">{error}</div>}
+          {error && <div className="text-sm text-red-300 text-center p-2 bg-red-900/20 rounded-lg">{error}</div>}
+          {message && <div className="text-sm text-green-300 text-center p-2 bg-green-900/20 rounded-lg">{message}</div>}
+
 
           <div>
             <Button type="submit" size="lg" className="w-full" isLoading={isLoading}>
